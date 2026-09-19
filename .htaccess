@@ -1,0 +1,9 @@
+# Block direct access to everything except the /api/ endpoints.
+<FilesMatch "\.(env|sql|md|json|lock)$">
+    Require all denied
+</FilesMatch>
+
+RewriteEngine On
+RewriteRule ^(src|config|vendor|db)/ - [F,L]
+
+Options -Indexes
