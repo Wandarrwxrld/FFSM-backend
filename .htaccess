@@ -1,9 +1,17 @@
-# Block direct access to everything except the /api/ endpoints.
-<FilesMatch "\.(env|sql|md|json|lock)$">
-    Require all denied
-</FilesMatch>
+   # Block direct access to everything except the /api/ endpoints.
+   <FilesMatch "\.(env|sql|md|json|lock)$">
+       Require all denied
+   </FilesMatch>
 
-RewriteEngine On
-RewriteRule ^(src|config|vendor|db)/ - [F,L]
+   RewriteEngine On
 
-Options -Indexes
+   # Apache + mod_php strips the Authorization header by default; this line
+   # passes it through so bearer-token auth works. Only relevant on classic
+   # Apache hosting — Railway's deployment uses router.php instead, which
+   # doesn't need this.
+   RewriteCond %{HTTP:Authorization} .
+   RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+   RewriteRule ^(src|config|vendor|db)/ - [F,L]
+
+   Options -Indexes
