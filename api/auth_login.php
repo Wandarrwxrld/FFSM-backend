@@ -34,7 +34,8 @@ if (!$user['email_verified_at']) {
 }
 
 [$rawToken, $tokenHash] = Auth::generateToken();
-$config = require __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/config.php';
+$config = ffms_config();
 $expiresAt = date('Y-m-d H:i:s', time() + $config['app']['token_ttl_days'] * 86400);
 
 $pdo->prepare(
