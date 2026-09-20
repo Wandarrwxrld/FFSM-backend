@@ -57,7 +57,8 @@ try {
     $userId = (int) $pdo->lastInsertId();
 
     [$rawToken, $tokenHash] = Auth::generateToken();
-    $config = require __DIR__ . '/../config/config.php';
+    require_once __DIR__ . '/../config/config.php';
+    $config = ffms_config();
     $expiresAt = date('Y-m-d H:i:s', time() + $config['app']['verification_ttl_hours'] * 3600);
 
     $insertVerification = $pdo->prepare(
