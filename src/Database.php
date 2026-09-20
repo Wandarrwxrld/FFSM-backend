@@ -14,8 +14,8 @@ class Database
             return self::$instance;
         }
 
-        $config = require __DIR__ . '/../config/config.php';
-        $db = $config['db'];
+        require_once __DIR__ . '/../config/config.php';
+        $config = ffms_config();
 
         $dsn = sprintf(
             'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
