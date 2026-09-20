@@ -20,7 +20,8 @@ set_error_handler(function ($severity, $message, $file, $line) {
     throw new ErrorException($message, 0, $severity, $file, $line);
 });
 
-$config = require __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/config.php';
+$config = ffms_config();
 
 // ---- CORS ----
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
