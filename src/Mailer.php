@@ -2,14 +2,14 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
 
-require_once __DIR__ . '/../config/config.php';
-$config = ffms_config();
+require_once __DIR__ . '/../vendor/autoload.php';
 
 class Mailer
 {
     private static function client(): PHPMailer
     {
-        $config = require __DIR__ . '/../config/config.php';
+        require_once __DIR__ . '/../config/config.php';
+        $config = ffms_config();
         $mail = $config['mail'];
 
         $phpMailer = new PHPMailer(true);
@@ -29,7 +29,8 @@ class Mailer
 
     private static function send(string $toEmail, string $toName, string $subject, string $bodyHtml, string $bodyText): bool
     {
-        $config = require __DIR__ . '/../config/config.php';
+        require_once __DIR__ . '/../config/config.php';
+        $config = ffms_config();
         if (empty($config['mail']['host'])) {
             // No SMTP configured (e.g. fresh local install) — don't hard-fail
             // the request, just log it so the flow is still testable.
@@ -53,7 +54,8 @@ class Mailer
 
     public static function sendVerificationEmail(string $toEmail, string $firstName, string $rawToken): bool
     {
-        $config = require __DIR__ . '/../config/config.php';
+        require_once __DIR__ . '/../config/config.php';
+        $config = ffms_config();
         $link = rtrim($config['app']['frontend_url'], '/') . '/verify-email.html?token=' . urlencode($rawToken) . '&email=' . urlencode($toEmail);
 
         $html = self::layout(
@@ -70,7 +72,8 @@ class Mailer
 
     public static function sendPasswordResetEmail(string $toEmail, string $firstName, string $rawToken): bool
     {
-        $config = require __DIR__ . '/../config/config.php';
+        require_once __DIR__ . '/../config/config.php';
+        $config = ffms_config();
         $link = rtrim($config['app']['frontend_url'], '/') . '/reset-password.html?token=' . urlencode($rawToken) . '&email=' . urlencode($toEmail);
 
         $html = self::layout(
