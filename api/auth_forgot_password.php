@@ -26,7 +26,8 @@ if (!$user) {
 }
 
 [$rawToken, $tokenHash] = Auth::generateToken();
-$config = require __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/config.php';
+$config = ffms_config();
 $expiresAt = date('Y-m-d H:i:s', time() + $config['app']['reset_ttl_minutes'] * 60);
 
 $pdo->prepare('INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES (:user_id, :hash, :expires)')
