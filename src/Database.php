@@ -15,7 +15,9 @@ class Database
         }
 
         require_once __DIR__ . '/../config/config.php';
+
         $config = ffms_config();
+        $db = $config['db'];
 
         $dsn = sprintf(
             'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
@@ -35,5 +37,7 @@ class Database
         }
 
         return self::$instance;
+    }
+}        return self::$instance;
     }
 }
