@@ -64,7 +64,9 @@ class Mailer
         $response = curl_exec($ch);
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $curlError = curl_error($ch);
-        curl_close($ch);
+        // No curl_close($ch) here on purpose — it's been a no-op since PHP
+        // 8.0 (curl handles are automatically freed), and calling it
+        // anyway just risks a deprecation notice on newer PHP versions.
 
         if ($curlError) {
             error_log("[Mailer/Resend] cURL error: {$curlError}");
