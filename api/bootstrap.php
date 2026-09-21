@@ -17,10 +17,21 @@ set_exception_handler(function (Throwable $e) {
     Response::error('Something went wrong on the server.', 500);
 });
 set_error_handler(function ($severity, $message, $file, $line) {
+    // Deprecation and notice-level messages (like PHP 8.5 flagging the
+    // now-pointless curl_close() call) are logged, not treated as fatal —
+    // only genuine errors/warnings should crash the request. Without this,
+    // any future PHP version's new deprecation notices would silently
+    // break working endpoints the same way this one did.
+    $nonFatal = E_DEPRECATED | E_USER_DEPRECATED | E_NOTICE | E_USER_NOTICE;
+    if ($severity & $nonFatal) {
+        error_log("[Deprecated/Notice] {$message} in {$file}:{$line}");
+        return true;
+    }
     throw new ErrorException($message, 0, $severity, $file, $line);
 });
 
 require_once __DIR__ . '/../config/config.php';
+
 $config = ffms_config();
 
 // ---- CORS ----
