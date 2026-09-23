@@ -12,11 +12,21 @@ $pk = $def['pk'];
 
 // Server-side role enforcement — the real security boundary. The front
 // end's sidebar filtering is just UX; this is what actually protects data.
-$user = Auth::requireRole($def['roles']);
+//
+// Reads (GET) are allowed for any logged-in user, regardless of role —
+// this is what lets e.g. a Worker viewing "Machinery Usage" see which
+// Field it happened in, even though "Fields" itself is an Owner/Manager/
+// Agronomist-only module. Writes (POST/PUT/DELETE) still require the
+// entity's own permitted roles — that's where the real protection is.
+$method = $_SERVER['REQUEST_METHOD'];
+if ($method === 'GET') {
+    $user = Auth::requireUser();
+} else {
+    $user = Auth::requireRole($def['roles']);
+}
 $userId = (int) $user['user_id'];
 
 $pdo = Database::connection();
-$method = $_SERVER['REQUEST_METHOD'];
 $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
 
 switch ($method) {
