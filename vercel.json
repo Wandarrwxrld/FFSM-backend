@@ -2,9 +2,27 @@
   "functions": {
     "api/*.php": {
       "runtime": "vercel-php@0.7.0"
+    },
+    "index.php": {
+      "runtime": "vercel-php@0.7.0"
     }
   },
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" }
+    {
+      "src": "/(src|config|db|vendor)/.*",
+      "status": 404
+    },
+    {
+      "src": "/(\\.env.*|composer\\.(json|lock)|README\\.md|Procfile|router\\.php)",
+      "status": 404
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/",
+      "dest": "/index.php"
+    }
   ]
 }
