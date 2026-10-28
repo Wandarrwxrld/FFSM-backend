@@ -58,11 +58,11 @@ function ffms_config(): array
     }
     $config = [
         'db' => [
-            'host' => ffms_env('DB_HOST', '127.0.0.1'),
-            'port' => ffms_env('DB_PORT', '3306'),
-            'name' => ffms_env('DB_NAME', 'ffms_db'),
-            'user' => ffms_env('DB_USER', 'root'),
-            'pass' => ffms_env('DB_PASS', ''),
+            'host' => ffms_env('DB_HOST', ffms_env('MYSQLHOST', '127.0.0.1')),
+            'port' => ffms_env('DB_PORT', ffms_env('MYSQLPORT', '3306')),
+            'name' => ffms_env('DB_NAME', ffms_env('MYSQLDATABASE', 'ffms_db')),
+            'user' => ffms_env('DB_USER', ffms_env('MYSQLUSER', 'root')),
+            'pass' => ffms_env('DB_PASS', ffms_env('MYSQLPASSWORD', '')),
         ],
         'app' => [
             // Comma-separated list of origins allowed to call this API
