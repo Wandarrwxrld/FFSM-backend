@@ -83,29 +83,31 @@ curl http://localhost:8888/ffms-backend/api/records.php?entity=farms \
   -H "Authorization: Bearer PASTE_LOGIN_TOKEN_HERE"
 ```
 
-## Deploying to Railway (recommended — native PHP, no Docker)
+## Deploying: backend on Vercel, database on Railway
 
-Railway builds this repo as a **native PHP app** — no Dockerfile involved, which matters if you want the deployment to visibly be "just PHP." It detects `composer.json`, runs `composer install`, and starts it using the `Procfile` included in this repo (`web: heroku-php-apache2 .`, the standard Heroku-buildpack convention Railway's builder also follows). Railway also offers MySQL as a first-party managed database plugin, in the same project — so the whole backend, database included, lives in one account.
+The PHP API runs on Vercel (`vercel.json` + the `vercel-php` runtime). The MySQL
+database stays on Railway. `Procfile` and `router.php` are only for running on
+Railway/Heroku-style hosts or locally and are ignored by Vercel.
 
-1. **Push this folder to its own GitHub repo** (Railway deploys from Git).
-2. In Railway, **New Project → Deploy from GitHub repo**, pick it.
-3. In the same project, click **+ New → Database → Add MySQL**. Railway provisions it and shows its connection variables (host, port, user, password, database name) on the MySQL service's **Variables** tab — the exact names are shown there in your dashboard.
-4. On your **PHP service's** Variables tab, set:
-   - `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS` — reference the MySQL service's variables using Railway's `${{ServiceName.VARIABLE_NAME}}` syntax (Railway's variable editor autocompletes this when you type `${{` — pick the matching field from the MySQL service).
-   - `ALLOWED_ORIGINS` — your frontend's real URL (Netlify or wherever it ends up).
-   - `FRONTEND_URL` — same, used to build the links inside verification/reset emails.
-   - `TOKEN_TTL_DAYS`, `VERIFICATION_TTL_HOURS`, `RESET_TTL_MINUTES` — same defaults as `.env.example`, or your own.
-   - `SMTP_HOST`, `SMTP_PORT`, `SMTP_ENCRYPTION`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM_EMAIL`, `MAIL_FROM_NAME`.
-   - There's no `.env` file in production — `config/config.php` reads real environment variables directly, and only falls back to a local `.env` file if one exists (i.e. on your own machine). Nothing to change there.
-5. Run the three SQL files against the Railway MySQL database once, from your machine, using the connection details from its Variables tab:
-   ```bash
-   mysql -h <MYSQL_HOST> -P <MYSQL_PORT> -u <MYSQL_USER> -p <MYSQL_DATABASE> < db/ffms_schema.sql
-   mysql -h <MYSQL_HOST> -P <MYSQL_PORT> -u <MYSQL_USER> -p <MYSQL_DATABASE> < db/auth_migration.sql
-   mysql -h <MYSQL_HOST> -P <MYSQL_PORT> -u <MYSQL_USER> -p <MYSQL_DATABASE> < db/seed_roles.sql
-   ```
-6. Deploy. Railway gives the service a public `*.up.railway.app` URL — visiting it should return the `index.php` health check JSON.
-7. If Railway doesn't auto-detect the `Procfile` (this can happen if it picks its newer Railpack builder over the older Nixpacks one), open the service's **Settings → Deploy → Custom Start Command** and set it manually to `heroku-php-apache2 .`.
-8. Update `js/api.js`'s `API_BASE` in the front end to this service's real URL, and redeploy the front end.
+1. Push this folder to its own GitHub repo and import it in Vercel.
+2. **Railway database:** use the *public* connection details (MySQL service ->
+   Connect -> Public Network / TCP proxy, e.g. `xxxx.proxy.rlwy.net:12345`).
+   Railway's internal host (`mysql.railway.internal`) is NOT reachable from Vercel.
+3. In Vercel -> Project -> Settings -> Environment Variables, set:
+   - `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS` (the public values above)
+   - `ALLOWED_ORIGINS` = your Netlify URL exactly, e.g. `https://smartfarmsystem.netlify.app`
+     (scheme + host, no trailing slash; comma-separate multiple origins)
+   - `FRONTEND_URL` = same Netlify URL (used in verification/reset email links)
+   - `TOKEN_TTL_DAYS`, `VERIFICATION_TTL_HOURS`, `RESET_TTL_MINUTES`
+   - `RESEND_API_KEY` (recommended) or the `SMTP_*` variables, plus `MAIL_FROM_EMAIL`, `MAIL_FROM_NAME`
+   Env var changes only apply to NEW deployments, so redeploy afterwards.
+4. **Turn off Deployment Protection** for the API: Settings -> Deployment Protection ->
+   set Vercel Authentication to Disabled (or at least for Production). While it is on,
+   Vercel redirects every request, including CORS preflights, to its login page and the
+   browser reports "Redirect is not allowed for a preflight request".
+5. Point the frontend's `js/config.js` at the backend's stable production domain
+   (Settings -> Domains), not a per-deployment URL.
+6. Check `https://<your-backend-domain>/` returns the health-check JSON.
 
 ## Other hosting options
 
